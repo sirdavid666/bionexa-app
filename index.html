@@ -1,21 +1,118 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#101c2c" />
-  <meta name="description" content="BioNexa - Your Biomedical Engineering Academic Companion." />
-  <title>BioNexa | Biomedical Engineering Companion</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="BioNexa - Biomedical Engineering learning companion">
+  <title>BioNexa | Learn. Understand. Build.</title>
 </head>
 <body>
-  <div id="app">
-    <div class="startup">
-      <div class="startup-logo">B</div>
-      <h1>BioNexa</h1>
-      <p>Preparing your learning environment...</p>
-    </div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">B</div>
+        <div>
+          <h2>BioNexa</h2>
+          <small>Learn. Understand. Build.</small>
+        </div>
+      </div>
+
+      <nav class="navigation" aria-label="Main navigation">
+        <button class="nav-item active" data-nav="home">Dashboard</button>
+        <button class="nav-item" data-nav="tutor">AI Tutor</button>
+        <button class="nav-item" data-nav="library">Subject Library</button>
+        <button class="nav-item" data-nav="tools">Calculators</button>
+        <button class="nav-item" data-nav="formulas">Formula Library</button>
+        <button class="nav-item" data-nav="quiz">Nexa Practice</button>
+        <button class="nav-item" data-nav="flashcards">AI Flashcards</button>
+        <button class="nav-item" data-nav="history">Practice History</button>
+        <button class="nav-item" data-nav="recommendations">Recommendations</button>
+        <button class="nav-item" data-nav="progress">My Progress</button>
+        <button class="nav-item" data-nav="planner">Study Planner</button>
+        <button class="nav-item" data-nav="recorder">Lecture Recorder</button>
+        <button class="nav-item" data-nav="notes">My Notes</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p>BioNexa Academic Companion</p>
+        <small>Learn. Understand. Build.</small>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">YOUR LEARNING SPACE</p>
+          <h1 id="page-title">Dashboard</h1>
+        </div>
+        <button id="theme-toggle" class="theme-toggle" type="button">
+          Toggle theme
+        </button>
+      </header>
+
+      <div class="page-container">
+        <section data-page="home"></section>
+
+        <section data-page="tutor" hidden>
+          <div id="tutor-content"></div>
+        </section>
+
+        <section data-page="library" hidden></section>
+
+        <section data-page="tools" hidden>
+          <div id="calculator-content"></div>
+        </section>
+
+        <section data-page="formulas" hidden>
+          <div id="formula-content"></div>
+        </section>
+
+        <section data-page="quiz" hidden>
+          <div id="quiz-content"></div>
+        </section>
+
+        <section data-page="flashcards" hidden>
+          <div id="flashcards-content"></div>
+        </section>
+
+        <section data-page="history" hidden>
+          <div class="content-panel">
+            <h2>Practice History</h2>
+            <h3>Topics to revise</h3>
+            <div id="weak-topic-list"></div>
+            <h3>Previous practice sessions</h3>
+            <div id="practice-history-list"></div>
+          </div>
+        </section>
+
+        <section data-page="recommendations" hidden>
+          <div id="recommendations-content"></div>
+        </section>
+
+        <section data-page="progress" hidden>
+          <div id="progress-content"></div>
+        </section>
+
+        <section data-page="planner" hidden>
+          <div id="planner-content"></div>
+        </section>
+
+        <section data-page="recorder" hidden>
+          <div id="recorder-content"></div>
+        </section>
+
+        <section data-page="notes" hidden>
+          <div id="notes-content"></div>
+        </section>
+      </div>
+
+      <footer class="app-footer">
+        <p>BioNexa · Built for Biomedical Engineering learning</p>
+      </footer>
+    </main>
   </div>
+
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>
