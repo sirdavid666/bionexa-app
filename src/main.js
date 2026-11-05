@@ -2,30 +2,33 @@
 import "./style.css";
 
 import { renderTutor, sendTutorQuestion, clearTutorHistory } from "./features/tutor.js";
-import { renderCalculators, calculateSelected } from "./features/calculators.js";
+import { renderCalculators, calculateSelected, bindCalculatorControls } from "./features/calculators.js";
 import { subjects } from "./data/subjects.js";
 import { renderNotes, saveNote, deleteNote } from "./features/notes.js";
 import { renderPlanner, addTask, toggleTask, deleteTask } from "./features/planner.js";
 import { renderFormulaLibrary, bindFormulaSearch } from "./features/formula-library.js";
 import { renderQuiz, bindQuiz } from "./features/quiz.js";
-import { renderLectureRecorder, bindLectureRecorder } from "./features/lecture-recorder.js";
 import { renderFlashcards, bindFlashcards } from "./features/flashcards.js";
+import { renderLectureRecorder, bindLectureRecorder } from "./features/lecture-recorder.js";
+import { renderPracticeHistory, bindPracticeHistory } from "./features/practice-history.js";
+import { renderProgress } from "./features/progress.js";
 
 const pages = [
   { id: "home", label: "Dashboard", icon: "⌂" },
   { id: "tutor", label: "AI Tutor", icon: "✦" },
   { id: "library", label: "Subjects", icon: "▤" },
   { id: "tools", label: "Calculators", icon: "⌗" },
-  { id: "formulas", label: "Formula Library", icon: "ƒ" },
-  { id: "quiz", label: "Quizzes", icon: "✓" },
-  { id: "flashcards", label: "Flashcards", icon: "▣" },
+  { id: "formulas", label: "Formulas", icon: "ƒ" },
+  { id: "quiz", label: "AI Quiz", icon: "✓" },
+  { id: "flashcards", label: "AI Flashcards", icon: "▣" },
+  { id: "history", label: "Practice History", icon: "◷" },
+  { id: "progress", label: "Progress", icon: "↗" },
   { id: "planner", label: "Study Planner", icon: "▦" },
   { id: "recorder", label: "Lecture Recorder", icon: "◉" },
   { id: "notes", label: "My Notes", icon: "✎" }
 ];
 
 let activePage = "home";
-
 const app = document.querySelector("#app");
 
 function getDateLabel() {
@@ -78,7 +81,6 @@ function renderShell() {
           </div>
           <div class="topbar-date">${getDateLabel()}</div>
         </header>
-
         <section class="page-content" id="page-content"></section>
       </main>
     </div>
@@ -117,15 +119,17 @@ function renderHome() {
 
     <div class="feature-grid">
       ${[
-        ["tutor", "✦", "AI Tutor", "Ask questions and work through difficult concepts."],
-        ["library", "▤", "Subject Library", "Explore your Biomedical Engineering subjects."],
-        ["tools", "⌗", "Calculators", "Solve common engineering calculations."],
-        ["formulas", "ƒ", "Formula Library", "Review important formulas and their uses."],
-        ["quiz", "✓", "Practice Quiz", "Test your understanding with questions."],
-        ["flashcards", "▣", "Flashcards", "Revise important terms and concepts."],
-        ["planner", "▦", "Study Planner", "Organise your academic tasks."],
+        ["tutor", "✦", "AI Tutor", "Learn concepts and ask questions."],
+        ["library", "▤", "Subject Library", "Explore your course subjects."],
+        ["tools", "⌗", "Calculators", "Solve engineering calculations."],
+        ["formulas", "ƒ", "Formula Library", "Review important formulas."],
+        ["quiz", "✓", "AI Quiz", "Generate fresh practice questions."],
+        ["flashcards", "▣", "AI Flashcards", "Create topic-based revision cards."],
+        ["history", "◷", "Practice History", "Review completed quiz attempts."],
+        ["progress", "↗", "Progress", "Identify topics to revise."],
+        ["planner", "▦", "Study Planner", "Organise academic tasks."],
         ["recorder", "◉", "Lecture Recorder", "Record lectures on supported devices."],
-        ["notes", "✎", "My Notes", "Keep your personal study notes."]
+        ["notes", "✎", "My Notes", "Keep personal study notes."]
       ].map(([id, icon, title, description]) => `
         <button class="feature-card" data-go="${id}">
           <span class="feature-icon">${icon}</span>
@@ -139,7 +143,7 @@ function renderHome() {
     <div class="welcome-card">
       <span class="eyebrow">YOUR STUDY FOUNDATION</span>
       <h3>Consistency matters more than speed.</h3>
-      <p>Use BioNexa to learn concepts, practise calculations and organise your studies one step at a time.</p>
+      <p>Learn concepts, practise calculations and organise your studies one step at a time.</p>
     </div>
   `;
 }
@@ -165,7 +169,7 @@ function renderLibrary() {
 function renderPage() {
   const content = document.querySelector("#page-content");
 
-  const pageRenderers = {
+  const renderers = {
     home: renderHome,
     tutor: renderTutor,
     library: renderLibrary,
@@ -173,12 +177,14 @@ function renderPage() {
     formulas: renderFormulaLibrary,
     quiz: renderQuiz,
     flashcards: renderFlashcards,
+    history: renderPracticeHistory,
+    progress: renderProgress,
     planner: renderPlanner,
     recorder: renderLectureRecorder,
     notes: renderNotes
   };
 
-  content.innerHTML = (pageRenderers[activePage] || renderHome)();
+  content.innerHTML = (renderers[activePage] || renderHome)();
   bindPageFeatures(content);
 }
 
@@ -194,6 +200,7 @@ function bindPageFeatures(content) {
     const send = () => sendTutorQuestion();
 
     content.querySelector("#send-question")?.addEventListener("click", send);
+
     content.querySelector("#tutor-input")?.addEventListener("keydown", event => {
       if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
@@ -216,6 +223,7 @@ function bindPageFeatures(content) {
   }
 
   if (activePage === "tools") {
+    bindCalculatorControls();
     content.querySelector("#calculate-button")?.addEventListener("click", calculateSelected);
   }
 
@@ -257,6 +265,7 @@ function bindPageFeatures(content) {
   if (activePage === "formulas") bindFormulaSearch();
   if (activePage === "quiz") bindQuiz();
   if (activePage === "flashcards") bindFlashcards();
+  if (activePage === "history") bindPracticeHistory();
   if (activePage === "recorder") bindLectureRecorder();
 }
 
