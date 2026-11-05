@@ -876,3 +876,141 @@ body.light-mode .formula-expression {
     flex: 1;
   }
 }
+/* ========================================
+   BIONEXA - NEXA PRACTICE RECOMMENDATIONS
+======================================== */
+
+.recommendation-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.recommendation-card {
+  padding: 20px;
+  border: 1px solid var(--border-color, rgba(255,255,255,.1));
+  border-radius: 16px;
+  background: var(--card-bg, rgba(255,255,255,.04));
+}
+
+.recommendation-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.recommendation-number {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent-color, #5b8cff);
+  color: white;
+  font-weight: 700;
+}
+
+.recommendation-priority {
+  font-size: .75rem;
+  opacity: .8;
+}
+
+.recommendation-card h3 {
+  margin: 0 0 9px;
+}
+
+.recommendation-card p {
+  line-height: 1.6;
+  opacity: .8;
+  margin-bottom: 18px;
+}
+
+.recommendation-card .primary-button {
+  width: 100%;
+}
+
+.history-topic-row,
+.history-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 15px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border-color, rgba(255,255,255,.1));
+  border-radius: 12px;
+  background: var(--card-bg, rgba(255,255,255,.04));
+}
+
+.history-topic-row strong,
+.history-entry strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.history-topic-row small,
+.history-entry small {
+  display: block;
+  opacity: .65;
+  font-size: .8rem;
+}
+
+.score-low {
+  color: #ff8585;
+  font-weight: 700;
+}
+
+.score-good {
+  color: #55c995;
+  font-weight: 700;
+}
+
+.empty-state {
+  padding: 18px;
+  border-radius: 12px;
+  opacity: .7;
+  line-height: 1.6;
+}
+
+.subject-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.subject-card {
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid var(--border-color, rgba(255,255,255,.1));
+  background: var(--card-bg, rgba(255,255,255,.04));
+}
+
+.subject-card h3 {
+  margin-top: 0;
+}
+
+.subject-card li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.subject-card .primary-button {
+  width: 100%;
+  margin-top: 12px;
+}
+
+@media (max-width: 600px) {
+  .recommendation-list,
+  .subject-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recommendation-card,
+  .subject-card {
+    padding: 16px;
+  }
+}
