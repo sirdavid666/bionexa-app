@@ -690,3 +690,189 @@ body.light-mode .formula-expression {
   color: var(--text);
   background: #f5f8f9;
 }
+/* Nexa Practice */
+
+.practice-message {
+  margin: 14px 0;
+  color: var(--accent);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.practice-message.error {
+  color: #ff8c8c;
+}
+
+.practice-hint {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.quiz-panel label,
+.flashcard-workspace label {
+  display: block;
+  margin: 15px 0 7px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.quiz-panel input,
+.quiz-panel select,
+.flashcard-workspace input,
+.flashcard-workspace select {
+  margin-bottom: 5px;
+}
+
+.quiz-panel > #quiz-setup > button,
+#flashcard-setup > button {
+  margin-top: 18px;
+}
+
+.quiz-progress {
+  display: flex;
+  justify-content: space-between;
+  margin: 22px 0 14px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.quiz-question {
+  font-size: 19px;
+  line-height: 1.55;
+}
+
+.quiz-options {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.quiz-option {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  background: var(--panel-soft);
+  text-align: left;
+  line-height: 1.5;
+}
+
+.quiz-option.selected {
+  border-color: var(--accent);
+  background: rgba(53, 198, 176, .12);
+}
+
+.quiz-option.correct {
+  border-color: #42c98b;
+  background: rgba(66, 201, 139, .13);
+}
+
+.quiz-option.incorrect {
+  border-color: #e77b7b;
+  background: rgba(231, 123, 123, .13);
+}
+
+.quiz-option:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.quiz-feedback {
+  margin: 15px 0;
+  padding: 14px;
+  border-radius: 9px;
+  color: var(--text);
+  background: var(--panel-soft);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.quiz-result {
+  padding: 24px 8px;
+  text-align: center;
+}
+
+.quiz-result h2 {
+  margin: 14px 0;
+  color: var(--accent);
+  font-size: 48px;
+}
+
+.quiz-result p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.saved-decks {
+  margin-top: 30px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.saved-decks h3 {
+  font-size: 15px;
+}
+
+.saved-deck-button {
+  width: 100%;
+  margin: 6px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--panel-soft);
+  text-align: left;
+  font-size: 12px;
+}
+
+.saved-deck-button:hover {
+  border-color: var(--accent);
+}
+
+.progress-section {
+  margin-top: 25px;
+}
+
+.progress-section h4 {
+  margin-bottom: 12px;
+}
+
+.weak-topic-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.weak-topic-row strong {
+  color: var(--accent);
+}
+
+#practice-history-list p,
+#weak-topic-list p {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 680px) {
+  .quiz-question {
+    font-size: 17px;
+  }
+
+  .quiz-actions button {
+    flex: 1;
+  }
+}
