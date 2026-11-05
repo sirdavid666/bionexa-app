@@ -1,382 +1,310 @@
+
 import "./style.css";
 
-import {
-  renderTutor,
-  sendTutorQuestion,
-  clearTutorHistory
-} from "./features/tutor.js";
-
-import {
-  renderCalculators,
-  calculateSelected,
-  bindCalculatorControls
-} from "./features/calculators.js";
-
-import { subjects } from "./data/subjects.js";
-
-import {
-  renderNotes,
-  saveNote,
-  deleteNote
-} from "./features/notes.js";
-
-import {
-  renderPlanner,
-  addTask,
-  toggleTask,
-  deleteTask
-} from "./features/planner.js";
-
-import {
-  renderFormulaLibrary,
-  bindFormulaSearch
-} from "./features/formula-library.js";
-
-import { renderQuiz, bindQuiz } from "./features/quiz.js";
-
-import {
-  renderLectureRecorder,
-  bindLectureRecorder
-} from "./features/lecture-recorder.js";
-
-import {
-  renderFlashcards,
-  bindFlashcards
-} from "./features/flashcards.js";
-
-import {
-  renderPracticeHistory,
-  bindPracticeHistory
-} from "./features/practice-history.js";
-
-import { renderProgress } from "./features/progress.js";
-
-import {
-  renderPracticeRecommendations,
-  bindPracticeRecommendations
-} from "./features/practice-recommendations.js";
-
-const pageNames = [
-  "home",
-  "tutor",
-  "library",
-  "tools",
-  "formulas",
-  "quiz",
-  "flashcards",
-  "history",
-  "recommendations",
-  "progress",
-  "planner",
-  "recorder",
-  "notes"
-];
-
-let activePage = "home";
-let pendingPracticeTopic = "";
-
-const pageTitles = {
-  home: "Dashboard",
-  tutor: "AI Tutor",
-  library: "Subject Library",
-  tools: "Engineering Calculators",
-  formulas: "Formula Library",
-  quiz: "Nexa Practice",
-  flashcards: "AI Flashcards",
-  history: "Practice History",
-  recommendations: "Study Recommendations",
-  progress: "My Progress",
-  planner: "Study Planner",
-  recorder: "Lecture Recorder",
-  notes: "My Notes"
+const pageContainers = {
+  home: '[data-page="home"]',
+  tutor: "#tutor-content",
+  library: '[data-page="library"]',
+  tools: "#calculator-content",
+  formulas: "#formula-content",
+  quiz: "#quiz-content",
+  flashcards: "#flashcards-content",
+  history: '[data-page="history"]',
+  recommendations: "#recommendations-content",
+  progress: "#progress-content",
+  planner: "#planner-content",
+  recorder: "#recorder-content",
+  notes: "#notes-content"
 };
 
-function getPageElement(page) {
-  return document.querySelector(`[data-page="${page}"]`);
+let currentPage = "home";
+const loadedPages = new Set();
+
+function mountHTML(selector, result) {
+  const target = document.querySelector(selector);
+
+  if (target && typeof result === "string") {
+    target.innerHTML = result;
+  }
 }
 
 function showPage(page) {
-  if (!pageNames.includes(page)) return;
+  const target = document.querySelector(`[data-page="${page}"]`);
 
-  activePage = page;
+  if (!target) {
+    console.error("BioNexa page not found:", page);
+    return;
+  }
 
-  document.querySelectorAll("[data-page]").forEach((element) => {
-    element.hidden = element.dataset.page !== page;
+  document.querySelectorAll("[data-page]").forEach(section => {
+    section.hidden = true;
   });
 
-  document.querySelectorAll("[data-nav]").forEach((element) => {
-    element.classList.toggle("active", element.dataset.nav === page);
+  target.hidden = false;
+  currentPage = page;
+
+  document.querySelectorAll("[data-nav]").forEach(button => {
+    button.classList.toggle("active", button.dataset.nav === page);
   });
 
-  const title = document.querySelector("#page-title");
-  if (title) title.textContent = pageTitles[page] || "BioNexa";
-
-  renderActivePage();
+  renderPage(page);
 }
 
-function renderHome() {
-  const container = getPageElement("home");
-  if (!container) return;
+function showPageError(page, error) {
+  console.error(`BioNexa ${page} error:`, error);
 
-  container.innerHTML = `
-    <section class="hero-card">
-      <p class="eyebrow">BIOMEDICAL ENGINEERING COMPANION</p>
-      <h1>Welcome to BioNexa</h1>
-      <p>Your learning space for Biomedical Engineering.</p>
-    </section>
+  const selector = pageContainers[page];
+  const target = selector ? document.querySelector(selector) : null;
 
-    <section class="feature-grid">
-      <button class="feature-card" data-open-page="tutor">
-        <span>🤖</span>
-        <h3>AI Tutor</h3>
-        <p>Understand difficult concepts.</p>
-      </button>
-
-      <button class="feature-card" data-open-page="quiz">
-        <span>🧠</span>
-        <h3>Nexa Practice</h3>
-        <p>Generate fresh AI-powered questions.</p>
-      </button>
-
-      <button class="feature-card" data-open-page="flashcards">
-        <span>📚</span>
-        <h3>AI Flashcards</h3>
-        <p>Create cards for active revision.</p>
-      </button>
-
-      <button class="feature-card" data-open-page="recommendations">
-        <span>🎯</span>
-        <h3>Study Recommendations</h3>
-        <p>Find topics that need more attention.</p>
-      </button>
-
-      <button class="feature-card" data-open-page="library">
-        <span>📖</span>
-        <h3>Subject Library</h3>
-        <p>Explore your course subjects.</p>
-      </button>
-
-      <button class="feature-card" data-open-page="tools">
-        <span>🧮</span>
-        <h3>Calculators</h3>
-        <p>Work through engineering calculations.</p>
-      </button>
-
-      <button class="feature-card" data-open-page="formulas">
-        <span>∑</span>
-        <h3>Formula Library</h3>
-        <p>Find useful formulas.</p>
-      </button>
-
-      <button class="feature-card" data-open-page="planner">
-        <span>🗓️</span>
-        <h3>Study Planner</h3>
-        <p>Organise your study tasks.</p>
-      </button>
-
-      <button class="feature-card" data-open-page="progress">
-        <span>📈</span>
-        <h3>My Progress</h3>
-        <p>Review your learning activity.</p>
-      </button>
-    </section>
-  `;
-}
-
-function renderLibrary() {
-  const container = getPageElement("library");
-  if (!container) return;
-
-  container.innerHTML = `
-    <section class="content-panel">
-      <h2>Biomedical Engineering Subjects</h2>
-      <p>Choose a subject to explore its topics or use them in Nexa Practice.</p>
-      <div class="subject-grid">
-        ${subjects.map((subject, index) => `
-          <article class="subject-card">
-            <h3>${escapeHTML(subject.name)}</h3>
-            <ul>
-              ${(subject.topics || []).map((topic) =>
-                `<li>${escapeHTML(topic)}</li>`
-              ).join("")}
-            </ul>
-            <button class="primary-button"
-              data-practice-subject="${index}">
-              Practise this subject
-            </button>
-          </article>
-        `).join("")}
+  if (target) {
+    target.innerHTML = `
+      <div class="error-message">
+        <h3>Unable to open this section</h3>
+        <p>Please check this feature's file and try again.</p>
       </div>
-    </section>
-  `;
+    `;
+  }
 }
 
-function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[character]);
-}
+async function renderPage(page) {
+  try {
+    switch (page) {
+      case "home": {
+        const home = document.querySelector('[data-page="home"]');
 
-function renderActivePage() {
-  switch (activePage) {
-    case "home":
-      renderHome();
-      break;
-
-    case "library":
-      renderLibrary();
-      break;
-
-    case "tutor":
-      renderTutor();
-      break;
-
-    case "tools":
-      renderCalculators();
-      bindCalculatorControls();
-      break;
-
-    case "formulas":
-      renderFormulaLibrary();
-      bindFormulaSearch();
-      break;
-
-    case "quiz":
-      renderQuiz();
-      bindQuiz();
-
-      if (pendingPracticeTopic) {
-        const topicInput = document.querySelector("#quiz-topic");
-        if (topicInput) topicInput.value = pendingPracticeTopic;
-        pendingPracticeTopic = "";
+        if (home && !loadedPages.has(page)) {
+          home.innerHTML = `
+            <div class="dashboard-welcome">
+              <h2>Welcome to BioNexa</h2>
+              <p>Your Biomedical Engineering study companion.</p>
+              <p>Choose a section from the navigation to get started.</p>
+            </div>
+          `;
+          loadedPages.add(page);
+        }
+        break;
       }
-      break;
 
-    case "flashcards":
-      renderFlashcards();
-      bindFlashcards();
-      break;
+      case "tutor": {
+        const module = await import("./features/tutor.js");
+        const result = module.renderTutor?.();
+        mountHTML("#tutor-content", result);
+        module.bindTutor?.();
+        break;
+      }
 
-    case "history":
-      renderPracticeHistory();
-      bindPracticeHistory();
-      break;
+      case "library": {
+        const target = document.querySelector('[data-page="library"]');
 
-    case "recommendations":
-      renderPracticeRecommendations();
-      bindPracticeRecommendations();
-      break;
+        if (target && !loadedPages.has(page)) {
+          target.innerHTML = `
+            <div class="section-heading">
+              <h2>Subject Library</h2>
+              <p>Explore your Biomedical Engineering study materials.</p>
+            </div>
+          `;
+          loadedPages.add(page);
+        }
+        break;
+      }
 
-    case "progress":
-      renderProgress();
-      break;
+      case "tools": {
+        const module = await import("./features/calculators.js");
+        mountHTML("#calculator-content", module.renderCalculators?.());
+        module.bindCalculatorControls?.();
+        break;
+      }
 
-    case "planner":
-      renderPlanner();
-      break;
+      case "formulas": {
+        const module = await import("./features/formula-library.js");
+        mountHTML("#formula-content", module.renderFormulaLibrary?.());
+        module.bindFormulaSearch?.();
+        break;
+      }
 
-    case "recorder":
-      renderLectureRecorder();
-      bindLectureRecorder();
-      break;
+      case "quiz": {
+        const module = await import("./features/quiz.js");
+        mountHTML("#quiz-content", module.renderQuiz?.());
+        module.bindQuiz?.();
+        break;
+      }
 
-    case "notes":
-      renderNotes();
-      break;
+      case "flashcards": {
+        const module = await import("./features/flashcards.js");
+        mountHTML("#flashcards-content", module.renderFlashcards?.());
+        module.bindFlashcards?.();
+        break;
+      }
+
+      case "history": {
+        const module = await import("./features/practice-history.js");
+        module.renderPracticeHistory?.();
+        module.bindPracticeHistory?.();
+        break;
+      }
+
+      case "recommendations": {
+        const module = await import("./features/practice-recommendations.js");
+        module.renderPracticeRecommendations?.();
+        module.bindPracticeRecommendations?.();
+        break;
+      }
+
+      case "progress": {
+        const module = await import("./features/progress.js");
+        mountHTML("#progress-content", module.renderProgress?.());
+        break;
+      }
+
+      case "planner": {
+        const module = await import("./features/planner.js");
+        mountHTML("#planner-content", module.renderPlanner?.());
+        break;
+      }
+
+      case "recorder": {
+        const module = await import("./features/lecture-recorder.js");
+        mountHTML("#recorder-content", module.renderLectureRecorder?.());
+        module.bindLectureRecorder?.();
+        break;
+      }
+
+      case "notes": {
+        const module = await import("./features/notes.js");
+        mountHTML("#notes-content", module.renderNotes?.());
+        break;
+      }
+
+      default:
+        console.warn("Unknown BioNexa page:", page);
+    }
+  } catch (error) {
+    showPageError(page, error);
   }
 }
 
-document.addEventListener("click", (event) => {
-  const nav = event.target.closest("[data-nav]");
-  if (nav) {
-    showPage(nav.dataset.nav);
+async function handleClick(event) {
+  const navButton = event.target.closest("[data-nav]");
+
+  if (navButton) {
+    showPage(navButton.dataset.nav);
     return;
   }
 
-  const openButton = event.target.closest("[data-open-page]");
-  if (openButton) {
-    showPage(openButton.dataset.openPage);
+  const themeButton = event.target.closest(
+    "#theme-toggle, [data-theme-toggle]"
+  );
+
+  if (themeButton) {
+    document.body.classList.toggle("light-mode");
+    document.body.classList.toggle("light-theme");
     return;
-  }
-
-  const subjectButton = event.target.closest("[data-practice-subject]");
-  if (subjectButton) {
-    const subject = subjects[Number(subjectButton.dataset.practiceSubject)];
-    if (subject) {
-      pendingPracticeTopic = subject.name;
-      showPage("quiz");
-    }
-  }
-});
-
-window.addEventListener("bionexa:practice-topic", (event) => {
-  const topic = String(event.detail?.topic || "").trim();
-  if (!topic) return;
-
-  pendingPracticeTopic = topic;
-  showPage("quiz");
-});
-
-document.addEventListener("click", (event) => {
-  if (event.target.closest("#send-question")) {
-    sendTutorQuestion();
-  }
-
-  if (event.target.closest("#clear-chat")) {
-    clearTutorHistory();
   }
 
   if (event.target.closest("#calculate-button")) {
-    calculateSelected();
+    const module = await import("./features/calculators.js");
+    module.calculateSelected?.();
+    return;
   }
 
   if (event.target.closest("#save-note")) {
-    saveNote();
+    const module = await import("./features/notes.js");
+    module.saveNote?.();
+    showPage("notes");
+    return;
   }
 
-  if (event.target.closest("[data-delete-note]")) {
-    deleteNote(event.target.closest("[data-delete-note]").dataset.deleteNote);
+  const deleteNoteButton = event.target.closest("[data-delete-note]");
+
+  if (deleteNoteButton) {
+    const module = await import("./features/notes.js");
+    module.deleteNote?.(Number(deleteNoteButton.dataset.deleteNote));
+    showPage("notes");
+    return;
   }
 
   if (event.target.closest("#add-task")) {
-    addTask();
+    const module = await import("./features/planner.js");
+    module.addTask?.();
+    showPage("planner");
+    return;
   }
 
-  if (event.target.closest("[data-toggle-task]")) {
-    toggleTask(event.target.closest("[data-toggle-task]").dataset.toggleTask);
+  const completeTaskButton = event.target.closest("[data-complete-task]");
+
+  if (completeTaskButton) {
+    const module = await import("./features/planner.js");
+    module.toggleTask?.(Number(completeTaskButton.dataset.completeTask));
+    showPage("planner");
+    return;
   }
 
-  if (event.target.closest("[data-delete-task]")) {
-    deleteTask(event.target.closest("[data-delete-task]").dataset.deleteTask);
+  const deleteTaskButton = event.target.closest("[data-delete-task]");
+
+  if (deleteTaskButton) {
+    const module = await import("./features/planner.js");
+    module.deleteTask?.(Number(deleteTaskButton.dataset.deleteTask));
+    showPage("planner");
+    return;
   }
-});
 
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" && event.target.matches("#tutor-input")) {
-    if (!event.shiftKey) {
-      event.preventDefault();
-      sendTutorQuestion();
-    }
+  if (
+    event.target.closest("#clear-tutor-history") ||
+    event.target.closest("#clear-chat")
+  ) {
+    const module = await import("./features/tutor.js");
+    module.clearTutorHistory?.();
+    return;
   }
-});
 
-const themeButton = document.querySelector("#theme-toggle");
+  if (
+    event.target.closest("#send-tutor-question") ||
+    event.target.closest("#send-question")
+  ) {
+    const module = await import("./features/tutor.js");
+    module.sendTutorQuestion?.();
+  }
+}
 
-if (themeButton) {
-  themeButton.addEventListener("click", () => {
-    document.body.classList.toggle("light-theme");
-    const lightMode = document.body.classList.contains("light-theme");
-    localStorage.setItem("bionexa_theme", lightMode ? "light" : "dark");
+document.addEventListener("click", event => {
+  handleClick(event).catch(error => {
+    console.error("BioNexa action error:", error);
   });
-}
+});
 
-const savedTheme = localStorage.getItem("bionexa_theme");
-if (savedTheme === "light") {
-  document.body.classList.add("light-theme");
-}
+document.addEventListener("keydown", event => {
+  if (
+    event.key === "Enter" &&
+    !event.shiftKey &&
+    (event.target.id === "tutor-input" ||
+      event.target.id === "question-input")
+  ) {
+    event.preventDefault();
+
+    import("./features/tutor.js")
+      .then(module => module.sendTutorQuestion?.())
+      .catch(error => console.error("Tutor error:", error));
+  }
+});
+
+document.addEventListener("bionexa:practice-topic", event => {
+  showPage("quiz");
+
+  setTimeout(() => {
+    const topicInput = document.querySelector("#quiz-topic");
+
+    if (topicInput && event.detail?.topic) {
+      topicInput.value = event.detail.topic;
+    }
+  }, 100);
+});
+
+window.addEventListener("error", event => {
+  console.error("BioNexa application error:", event.error);
+});
+
+window.addEventListener("unhandledrejection", event => {
+  console.error("BioNexa loading error:", event.reason);
+});
 
 showPage("home");
