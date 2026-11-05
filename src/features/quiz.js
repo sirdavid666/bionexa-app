@@ -1,161 +1,227 @@
 
-export const quizQuestions = [
-  {
-    question: "What is the SI unit of electrical resistance?",
-    options: ["Volt", "Ampere", "Ohm", "Watt"],
-    answer: 2,
-    explanation: "Electrical resistance is measured in ohms (Ω)."
-  },
-  {
-    question: "Which law relates force, mass and acceleration?",
-    options: [
-      "Ohm's law",
-      "Newton's second law",
-      "Faraday's law",
-      "Hooke's law"
-    ],
-    answer: 1,
-    explanation: "Newton's second law is expressed as F = ma."
-  },
-  {
-    question: "Which instrument is commonly used to measure blood pressure?",
-    options: [
-      "Thermometer",
-      "Sphygmomanometer",
-      "Electrocardiograph",
-      "Spirometer"
-    ],
-    answer: 1,
-    explanation: "A sphygmomanometer measures arterial blood pressure."
-  },
-  {
-    question: "What does ECG stand for?",
-    options: [
-      "Electronic Cardiac Gauge",
-      "Electrocardiogram",
-      "Electrical Current Graph",
-      "External Cardiac Generator"
-    ],
-    answer: 1,
-    explanation: "ECG stands for electrocardiogram."
-  },
-  {
-    question: "Which material property describes resistance to deformation?",
-    options: [
-      "Stiffness",
-      "Colour",
-      "Density",
-      "Transparency"
-    ],
-    answer: 0,
-    explanation: "Stiffness describes resistance to elastic deformation."
-  }
-];
+import { generatePracticeSet } from "../services/practice-service.js";
+import { savePracticeResult } from "./practice-history.js";
 
-let currentQuestion = 0;
+let currentSet = null;
+let currentIndex = 0;
 let score = 0;
+let selectedAnswer = null;
 let answered = false;
 
 export function renderQuiz() {
-  currentQuestion = 0;
+  currentSet = null;
+  currentIndex = 0;
   score = 0;
+  selectedAnswer = null;
   answered = false;
 
   return `
-    <div class="section-intro">
-      <h1>Knowledge Check</h1>
-      <p>Test your understanding of engineering and biomedical concepts.</p>
+    <div class="page-intro">
+      <span class="eyebrow">NEXA PRACTICE</span>
+      <h2>AI-powered quiz</h2>
+      <p>Choose any topic and let your AI tutor create a fresh practice session.</p>
     </div>
 
-    <div class="calculator-panel" id="quiz-container">
-      ${questionHTML()}
-    </div>
+    <section class="quiz-panel">
+      <div id="quiz-setup">
+        <label for="quiz-topic">What topic do you want to practise?</label>
+        <input id="quiz-topic" placeholder="e.g. Ohm's law, ECG signals, cell physiology">
+
+        <label for="quiz-difficulty">Difficulty</label>
+        <select id="quiz-difficulty">
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+
+        <label for="quiz-count">Number of questions</label>
+        <select id="quiz-count">
+          <option value="5">5 questions</option>
+          <option value="10">10 questions</option>
+          <option value="15">15 questions</option>
+        </select>
+
+        <button class="primary-button" id="generate-quiz">Generate my quiz</button>
+        <p class="practice-hint">An internet connection is required to generate a new quiz.</p>
+      </div>
+
+      <div id="quiz-message" class="practice-message" aria-live="polite"></div>
+      <div id="quiz-question-area"></div>
+    </section>
   `;
 }
 
-function questionHTML() {
-  const question = quizQuestions[currentQuestion];
+function showMessage(message, isError = false) {
+  const element = document.querySelector("#quiz-message");
+  if (!element) return;
 
-  return `
-    <span class="section-tag">
-      QUESTION ${currentQuestion + 1} OF ${quizQuestions.length}
-    </span>
+  element.textContent = message;
+  element.classList.toggle("error", isError);
+}
 
-    <h2>${question.question}</h2>
+function renderQuestion() {
+  const area = document.querySelector("#quiz-question-area");
+  if (!area || !currentSet) return;
 
-    <div class="quiz-options">
-      ${question.options.map((option, index) => `
-        <button class="quiz-option" data-answer="${index}">
-          ${option}
-        </button>
-      `).join("")}
+  const question = currentSet.questions[currentIndex];
+
+  area.innerHTML = `
+    <div class="quiz-progress">
+      <span>Question ${currentIndex + 1} of ${currentSet.questions.length}</span>
+      <span>Score: ${score}</span>
     </div>
 
-    <div id="quiz-feedback"></div>
-
-    <button class="primary-button" id="next-question" disabled>
-      ${currentQuestion === quizQuestions.length - 1 ? "Finish quiz" : "Next question"}
-    </button>
+    <h3 class="quiz-question"></h3>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div id="quiz-feedback" class="quiz-feedback" aria-live="polite"></div>
+    <div class="quiz-actions">
+      <button class="primary-button" id="quiz-check" disabled>Check answer</button>
+      <button class="secondary-button" id="quiz-next" hidden>
+        ${currentIndex === currentSet.questions.length - 1 ? "Finish quiz" : "Next question →"}
+      </button>
+    </div>
   `;
+
+  area.querySelector(".quiz-question").textContent = question.question;
+
+  const options = area.querySelector("#quiz-options");
+
+  question.options.forEach((option, index) => {
+    const button = document.createElement("button");
+    button.className = "quiz-option";
+    button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+
+    button.addEventListener("click", () => {
+      if (answered) return;
+
+      selectedAnswer = index;
+      options.querySelectorAll("button").forEach(item => {
+        item.classList.remove("selected");
+      });
+
+      button.classList.add("selected");
+      area.querySelector("#quiz-check").disabled = false;
+    });
+
+    options.appendChild(button);
+  });
+
+  area.querySelector("#quiz-check").addEventListener("click", checkAnswer);
+  area.querySelector("#quiz-next").addEventListener("click", nextQuestion);
+}
+
+function checkAnswer() {
+  if (selectedAnswer === null || answered || !currentSet) return;
+
+  answered = true;
+
+  const question = currentSet.questions[currentIndex];
+  const correct = selectedAnswer === question.correctIndex;
+
+  if (correct) score += 1;
+
+  const options = document.querySelectorAll("#quiz-options .quiz-option");
+
+  options.forEach((button, index) => {
+    button.disabled = true;
+
+    if (index === question.correctIndex) {
+      button.classList.add("correct");
+    } else if (index === selectedAnswer) {
+      button.classList.add("incorrect");
+    }
+  });
+
+  const feedback = document.querySelector("#quiz-feedback");
+  feedback.textContent = `${correct ? "Correct!" : "Not quite."} ${question.explanation}`;
+
+  document.querySelector("#quiz-check").hidden = true;
+  document.querySelector("#quiz-next").hidden = false;
+}
+
+function nextQuestion() {
+  if (!currentSet) return;
+
+  if (currentIndex < currentSet.questions.length - 1) {
+    currentIndex += 1;
+    selectedAnswer = null;
+    answered = false;
+    renderQuestion();
+    return;
+  }
+
+  finishQuiz();
+}
+
+function finishQuiz() {
+  const total = currentSet.questions.length;
+  const percentage = Math.round((score / total) * 100);
+
+  savePracticeResult({
+    type: "quiz",
+    topic: currentSet.topic,
+    score,
+    total,
+    percentage,
+    completedAt: new Date().toISOString()
+  });
+
+  const area = document.querySelector("#quiz-question-area");
+
+  area.innerHTML = `
+    <div class="quiz-result">
+      <span class="eyebrow">PRACTICE COMPLETED</span>
+      <h2>${percentage}%</h2>
+      <p>You scored ${score} out of ${total}.</p>
+      <p>${percentage >= 80
+        ? "Good work. Keep strengthening your understanding."
+        : "Use the explanations to review the areas you found difficult."}</p>
+      <button class="primary-button" id="quiz-again">Create another quiz</button>
+    </div>
+  `;
+
+  area.querySelector("#quiz-again").addEventListener("click", () => {
+    currentSet = null;
+    currentIndex = 0;
+    score = 0;
+    selectedAnswer = null;
+    answered = false;
+    area.innerHTML = "";
+    document.querySelector("#quiz-topic").focus();
+    showMessage("Choose a topic to begin another practice session.");
+  });
 }
 
 export function bindQuiz() {
-  const container = document.querySelector("#quiz-container");
-  if (!container) return;
+  document.querySelector("#generate-quiz")?.addEventListener("click", async () => {
+    const topic = document.querySelector("#quiz-topic")?.value.trim();
+    const difficulty = document.querySelector("#quiz-difficulty")?.value;
+    const count = document.querySelector("#quiz-count")?.value;
+    const button = document.querySelector("#generate-quiz");
 
-  container.addEventListener("click", event => {
-    const option = event.target.closest("[data-answer]");
-    const next = event.target.closest("#next-question");
-
-    if (option && !answered) {
-      answered = true;
-
-      const selected = Number(option.dataset.answer);
-      const question = quizQuestions[currentQuestion];
-      const correct = selected === question.answer;
-
-      if (correct) score++;
-
-      container.querySelectorAll(".quiz-option").forEach(button => {
-        button.disabled = true;
-
-        if (Number(button.dataset.answer) === question.answer) {
-          button.classList.add("correct-answer");
-        } else if (Number(button.dataset.answer) === selected) {
-          button.classList.add("wrong-answer");
-        }
-      });
-
-      container.querySelector("#quiz-feedback").textContent =
-        `${correct ? "Correct!" : "Not quite."} ${question.explanation}`;
-
-      container.querySelector("#next-question").disabled = false;
+    if (!topic) {
+      showMessage("Enter a topic before generating your quiz.", true);
+      return;
     }
 
-    if (next && answered) {
-      currentQuestion++;
+    button.disabled = true;
+    button.textContent = "Generating questions...";
+    showMessage("Your AI tutor is preparing your questions.");
 
-      if (currentQuestion >= quizQuestions.length) {
-        container.innerHTML = `
-          <h2>Quiz completed!</h2>
-          <p>You scored ${score} out of ${quizQuestions.length}.</p>
-          <button class="primary-button" id="restart-quiz">
-            Try again
-          </button>
-        `;
-
-        container.querySelector("#restart-quiz").addEventListener("click", () => {
-          currentQuestion = 0;
-          score = 0;
-          answered = false;
-          container.innerHTML = questionHTML();
-        });
-
-        return;
-      }
-
+    try {
+      currentSet = await generatePracticeSet({ topic, difficulty, count });
+      currentIndex = 0;
+      score = 0;
+      selectedAnswer = null;
       answered = false;
-      container.innerHTML = questionHTML();
+
+      showMessage(`Your practice set: ${currentSet.title}`);
+      renderQuestion();
+    } catch (error) {
+      showMessage(error.message || "Could not generate the quiz. Please try again.", true);
+    } finally {
+      button.disabled = false;
+      button.textContent = "Generate my quiz";
     }
   });
 }
