@@ -38,7 +38,10 @@ export function renderProgress() {
 
   const average = history.length
     ? Math.round(
-        history.reduce((sum, item) => sum + item.percentage, 0) / history.length
+        history.reduce(
+          (sum, item) => sum + Number(item.percentage || 0),
+          0
+        ) / history.length
       )
     : 0;
 
@@ -71,7 +74,7 @@ export function renderProgress() {
             ? weakTopics.map(item => `
                 <div class="weak-topic-row">
                   <span>${escapeHTML(item.topic)}</span>
-                  <strong>${item.averagePercentage}%</strong>
+                  <strong>${Math.round(item.average)}%</strong>
                 </div>
               `).join("")
             : "<p>Complete some quizzes to see your learning recommendations here.</p>"
@@ -82,11 +85,11 @@ export function renderProgress() {
 }
 
 function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, character => ({
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
     '"': "&quot;",
-    "'": "&#039;"
+    "'": "&#39;"
   })[character]);
 }
