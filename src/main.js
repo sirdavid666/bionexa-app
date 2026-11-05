@@ -1,20 +1,21 @@
 
 import "./style.css";
+import { renderTutor } from "./features/tutor.js";
+import { renderCalculators } from "./features/calculators.js";
+import { subjects } from "./data/subjects.js";
+import { renderNotes } from "./features/notes.js";
 
 const app = document.querySelector("#app");
 
-const navigation = [
-  { id: "home", label: "Home", icon: "⌂" },
-  { id: "tutor", label: "AI Tutor", icon: "✧" },
-  { id: "library", label: "Library", icon: "▤" },
-  { id: "tools", label: "Tools", icon: "⌘" },
-  { id: "notes", label: "Notes", icon: "▧" }
+const pages = [
+  ["home", "⌂", "Dashboard"],
+  ["tutor", "✧", "AI Tutor"],
+  ["library", "▤", "Learning Library"],
+  ["tools", "⌘", "Engineering Tools"],
+  ["notes", "▧", "My Notes"]
 ];
 
-const state = {
-  currentPage: "home",
-  darkMode: true
-};
+let currentPage = "home";
 
 function render() {
   app.innerHTML = `
@@ -31,11 +32,10 @@ function render() {
         <div class="nav-heading">WORKSPACE</div>
 
         <nav class="navigation">
-          ${navigation.map(item => `
-            <button class="nav-item ${state.currentPage === item.id ? "active" : ""}"
-              data-page="${item.id}">
-              <span class="nav-icon">${item.icon}</span>
-              ${item.label}
+          ${pages.map(([id, icon, label]) => `
+            <button class="nav-item ${currentPage === id ? "active" : ""}"
+              data-page="${id}">
+              <span class="nav-icon">${icon}</span>${label}
             </button>
           `).join("")}
         </nav>
@@ -53,10 +53,9 @@ function render() {
         <header class="topbar">
           <div>
             <span class="eyebrow">YOUR ACADEMIC COMPANION</span>
-            <h2>${pageTitle()}</h2>
+            <h2>${pages.find(page => page[0] === currentPage)[2]}</h2>
           </div>
-          <button class="theme-button" id="theme-toggle"
-            aria-label="Toggle theme">☼</button>
+          <button class="theme-button" id="theme-toggle">☼</button>
         </header>
 
         <section class="page-content">
@@ -70,74 +69,46 @@ function render() {
     </div>
   `;
 
-  bindEvents();
-}
-
-function pageTitle() {
-  const titles = {
-    home: "Dashboard",
-    tutor: "AI Academic Tutor",
-    library: "Learning Library",
-    tools: "Engineering Tools",
-    notes: "My Notes"
-  };
-
-  return titles[state.currentPage] || "Dashboard";
+  bindNavigation();
+  bindTheme();
+  bindPageFeatures();
 }
 
 function renderPage() {
-  switch (state.currentPage) {
+  switch (currentPage) {
     case "tutor":
-      return `
-        <div class="welcome-card">
-          <span class="section-tag">YOUR INTELLIGENT LEARNING PARTNER</span>
-          <h1>What would you like to understand today?</h1>
-          <p>Ask questions about Biomedical Engineering, mathematics,
-          physics and engineering concepts.</p>
-          <div class="coming-soon">AI CONNECTION — COMING NEXT</div>
-        </div>
-      `;
+      return renderTutor();
+
+    case "tools":
+      return renderCalculators();
 
     case "library":
       return `
         <div class="section-intro">
-          <h1>Explore your learning library</h1>
-          <p>Build your knowledge, one subject at a time.</p>
+          <h1>Biomedical Engineering Library</h1>
+          <p>Explore your academic subjects.</p>
         </div>
-        <div class="feature-grid">
-          ${featureCard("Mathematics", "Calculations and mathematical principles", "∑")}
-          ${featureCard("Physics", "Understand the physical world", "ϕ")}
-          ${featureCard("Anatomy", "Explore the human body", "◎")}
-          ${featureCard("Physiology", "Understand body functions", "♡")}
-          ${featureCard("Electronics", "Circuits and components", "ϟ")}
-          ${featureCard("Biomechanics", "Engineering and human movement", "↗")}
-        </div>
-      `;
 
-    case "tools":
-      return `
-        <div class="section-intro">
-          <h1>Engineering tools</h1>
-          <p>Practical tools for your calculations and studies.</p>
-        </div>
         <div class="feature-grid">
-          ${featureCard("Scientific Calculator", "Perform academic calculations", "±")}
-          ${featureCard("Unit Converter", "Convert engineering measurements", "⇄")}
-          ${featureCard("Formula Centre", "Find important equations", "ƒ")}
-          ${featureCard("Electrical Tools", "Explore electrical calculations", "ϟ")}
+          ${subjects.map(subject => `
+            <article class="feature-card">
+              <span class="feature-icon">${subject.icon}</span>
+              <strong>${subject.name}</strong>
+              <p>${subject.description}</p>
+              <span class="card-arrow">${subject.topics.length} topics</span>
+              <details>
+                <summary>Explore topics</summary>
+                <ul>
+                  ${subject.topics.map(topic => `<li>${topic}</li>`).join("")}
+                </ul>
+              </details>
+            </article>
+          `).join("")}
         </div>
       `;
 
     case "notes":
-      return `
-        <div class="welcome-card">
-          <span class="section-tag">PERSONAL KNOWLEDGE CENTRE</span>
-          <h1>Your ideas deserve a home.</h1>
-          <p>Create, organise and revisit your academic notes.</p>
-          <button class="primary-button" id="new-note">New note</button>
-        </div>
-        <div id="notes-area"></div>
-      `;
+      return renderNotes();
 
     default:
       return `
@@ -145,97 +116,102 @@ function renderPage() {
           <div>
             <span class="section-tag">WELCOME TO YOUR LEARNING SPACE</span>
             <h1>Welcome, David.</h1>
-            <p>Your journey in Biomedical Engineering starts here.
-            Learn deeply. Think critically. Build confidently.</p>
+            <p>Your Biomedical Engineering learning environment
+            is taking shape. Learn deeply, think critically
+            and build confidently.</p>
             <button class="primary-button" data-page="tutor">
-              Open AI Tutor <span>→</span>
+              Open AI Tutor →
             </button>
           </div>
           <div class="hero-symbol">B</div>
         </div>
 
         <div class="section-heading">
-          <div>
-            <h2>Your workspace</h2>
-            <p>Everything you need to keep learning.</p>
-          </div>
+          <h2>Your workspace</h2>
+          <p>Choose where you want to begin.</p>
         </div>
 
         <div class="feature-grid">
-          ${featureCard("AI Academic Tutor", "Understand difficult concepts", "✧", "tutor")}
-          ${featureCard("Learning Library", "Explore engineering subjects", "▤", "library")}
-          ${featureCard("Engineering Tools", "Calculate, convert and solve", "⌘", "tools")}
-          ${featureCard("Personal Notes", "Keep your knowledge organised", "▧", "notes")}
-        </div>
-
-        <div class="section-heading">
-          <div>
-            <h2>Your academic journey</h2>
-            <p>Your study progress will appear here.</p>
-          </div>
-        </div>
-
-        <div class="progress-card">
-          <div class="progress-icon">✦</div>
-          <div>
-            <strong>Your learning dashboard is ready.</strong>
-            <p>Study hours, quiz results and completed topics
-            will be tracked as we add those features.</p>
-          </div>
+          ${homeCard("AI Academic Tutor", "Ask questions and learn with AI.", "✧", "tutor")}
+          ${homeCard("Learning Library", "Explore Biomedical Engineering.", "▤", "library")}
+          ${homeCard("Engineering Tools", "Calculate and solve problems.", "⌘", "tools")}
+          ${homeCard("Personal Notes", "Organise your academic knowledge.", "▧", "notes")}
         </div>
       `;
   }
 }
 
-function featureCard(title, description, icon, page = "") {
+function homeCard(title, description, icon, page) {
   return `
-    <button class="feature-card" ${page ? `data-page="${page}"` : ""}>
+    <button class="feature-card" data-page="${page}">
       <span class="feature-icon">${icon}</span>
       <strong>${title}</strong>
       <p>${description}</p>
-      <span class="card-arrow">Explore →</span>
+      <span class="card-arrow">Open →</span>
     </button>
   `;
 }
 
-function bindEvents() {
+function bindNavigation() {
   document.querySelectorAll("[data-page]").forEach(button => {
     button.addEventListener("click", () => {
-      state.currentPage = button.dataset.page;
+      currentPage = button.dataset.page;
       render();
     });
   });
+}
 
+function bindTheme() {
   document.querySelector("#theme-toggle")?.addEventListener("click", () => {
-    state.darkMode = !state.darkMode;
-    document.body.classList.toggle("light-mode", !state.darkMode);
+    document.body.classList.toggle("light-mode");
   });
+}
 
-  document.querySelector("#new-note")?.addEventListener("click", () => {
-    const area = document.querySelector("#notes-area");
-    area.innerHTML = `
-      <div class="note-editor">
-        <input id="note-title" placeholder="Note title" />
-        <textarea id="note-content" placeholder="Write your note..."></textarea>
-        <button class="primary-button" id="save-note">Save note</button>
-      </div>
-    `;
-
-    document.querySelector("#save-note").addEventListener("click", () => {
-      const title = document.querySelector("#note-title").value.trim();
-      const content = document.querySelector("#note-content").value.trim();
-
-      if (!title || !content) {
-        alert("Please enter a title and note.");
-        return;
-      }
-
-      const notes = JSON.parse(localStorage.getItem("bionexa-notes") || "[]");
-      notes.push({ title, content, createdAt: new Date().toISOString() });
-      localStorage.setItem("bionexa-notes", JSON.stringify(notes));
-      area.innerHTML = "<p class='success-message'>Note saved successfully.</p>";
+function bindPageFeatures() {
+  if (currentPage === "tutor") {
+    document.querySelector("#send-question")?.addEventListener("click", async () => {
+      const { sendTutorQuestion } = await import("./features/tutor.js");
+      sendTutorQuestion();
     });
-  });
+
+    document.querySelector("#question-input")?.addEventListener("keydown", event => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        document.querySelector("#send-question")?.click();
+      }
+    });
+
+    document.querySelectorAll("[data-prompt]").forEach(button => {
+      button.addEventListener("click", () => {
+        const input = document.querySelector("#question-input");
+        input.value = button.dataset.prompt;
+        input.focus();
+      });
+    });
+  }
+
+  if (currentPage === "tools") {
+    document.querySelector("#calculate")?.addEventListener("click", async () => {
+      const { calculateSelected } = await import("./features/calculators.js");
+      calculateSelected();
+    });
+  }
+
+  if (currentPage === "notes") {
+    document.querySelector("#save-note")?.addEventListener("click", async () => {
+      const { saveNote } = await import("./features/notes.js");
+      saveNote();
+      render();
+    });
+
+    document.querySelectorAll("[data-delete-note]").forEach(button => {
+      button.addEventListener("click", async () => {
+        const { deleteNote } = await import("./features/notes.js");
+        deleteNote(Number(button.dataset.deleteNote));
+        render();
+      });
+    });
+  }
 }
 
 render();
