@@ -1,24 +1,28 @@
-
 import { Storage } from "../services/storage.js";
 
 const HISTORY_KEY = "practice_history";
 
 export function getPracticeHistory() {
-  return Storage.get(HISTORY_KEY, []) || [];
+  const history = Storage.get(HISTORY_KEY, []);
+  return Array.isArray(history) ? history : [];
 }
 
 export function savePracticeResult(result) {
   const history = getPracticeHistory();
 
   const entry = {
-    id: `${Date.now()}`,
-    type: result.type || "practice",
+    id: Date.now(),
     topic: String(result.topic || "General practice"),
     score: Number(result.score) || 0,
     total: Number(result.total) || 0,
     percentage: Number(result.percentage) || 0,
-    completedAt: result.completedAt || new Date().toISOString()
+    difficulty: result.difficulty || "beginner",
+    date: new Date().toISOString()
   };
+
+  if (!entry.percentage && entry.total > 0) {
+    entry.percentage = Math.round((entry.score / entry.total) * 100);
+  }
 
   history.unshift(entry);
   Storage.set(HISTORY_KEY, history.slice(0, 100));
@@ -30,90 +34,113 @@ export function getTopicPerformance() {
   const history = getPracticeHistory();
   const topics = {};
 
-  history.forEach(item => {
-    const name = item.topic || "General practice";
+  history.forEach((item) => {
+    const topic = item.topic || "General practice";
 
-    if (!topics[name]) {
-      topics[name] = {
-        topic: name,
+    if (!topics[topic]) {
+      topics[topic] = {
+        topic,
         attempts: 0,
         totalPercentage: 0,
-        latestPercentage: item.percentage
+        average: 0,
+        latestScore: 0
       };
     }
 
-    topics[name].attempts += 1;
-    topics[name].totalPercentage += item.percentage;
+    const percentage = Number(
+      item.percentage ??
+      (item.total ? (item.score / item.total) * 100 : 0)
+    );
+
+    topics[topic].attempts += 1;
+    topics[topic].totalPercentage += percentage;
+
+    if (topics[topic].attempts === 1) {
+      topics[topic].latestScore = percentage;
+    }
   });
 
-  return Object.values(topics)
-    .map(item => ({
-      ...item,
-      averagePercentage: Math.round(item.totalPercentage / item.attempts)
-    }))
-    .sort((a, b) => a.averagePercentage - b.averagePercentage);
+  return Object.values(topics).map((item) => ({
+    ...item,
+    average: item.attempts
+      ? item.totalPercentage / item.attempts
+      : 0
+  })).sort((a, b) => a.average - b.average);
 }
 
-export function getWeakTopics(limit = 5) {
+export function getWeakTopics() {
   return getTopicPerformance()
-    .filter(item => item.averagePercentage < 70)
-    .slice(0, limit);
+    .filter((item) => item.average < 70)
+    .sort((a, b) => a.average - b.average);
 }
 
 export function renderPracticeHistory() {
   const history = getPracticeHistory();
   const weakTopics = getWeakTopics();
 
-  return `
-    <section class="progress-panel">
-      <span class="eyebrow">NEXA PRACTICE</span>
-      <h3>Practice history</h3>
-      <p>${history.length} completed quiz session(s)</p>
-
-      <h4>Topics to revisit</h4>
-      <div id="weak-topic-list"></div>
-
-      <h4>Recent attempts</h4>
-      <div id="practice-history-list"></div>
-    </section>
-  `;
-}
-
-export function bindPracticeHistory() {
   const weakContainer = document.querySelector("#weak-topic-list");
   const historyContainer = document.querySelector("#practice-history-list");
 
-  if (!weakContainer || !historyContainer) return;
-
-  const weakTopics = getWeakTopics();
-  const history = getPracticeHistory();
-
-  weakContainer.replaceChildren();
-
-  if (!weakTopics.length) {
-    weakContainer.textContent = "Complete some quizzes to discover which topics need more revision.";
-  } else {
-    weakTopics.forEach(item => {
-      const row = document.createElement("p");
-      row.textContent = `${item.topic}: ${item.averagePercentage}% average`;
-      weakContainer.appendChild(row);
-    });
+  if (weakContainer) {
+    weakContainer.innerHTML = weakTopics.length
+      ? weakTopics.map((item) => `
+          <article class="history-topic-row">
+            <div>
+              <strong>${escapeHTML(item.topic)}</strong>
+              <small>${item.attempts} attempt(s)</small>
+            </div>
+            <span class="score-low">${Math.round(item.average)}%</span>
+          </article>
+        `).join("")
+      : `<p class="empty-state">No weak topics identified yet. Complete a few quizzes to see your revision priorities.</p>`;
   }
 
-  historyContainer.replaceChildren();
+  if (historyContainer) {
+    historyContainer.innerHTML = history.length
+      ? history.map((item) => {
+          const percentage = Number(
+            item.percentage ??
+            (item.total ? (item.score / item.total) * 100 : 0)
+          );
 
-  if (!history.length) {
-    historyContainer.textContent = "Your completed quizzes will appear here.";
-    return;
+          return `
+            <article class="history-entry">
+              <div>
+                <strong>${escapeHTML(item.topic || "General practice")}</strong>
+                <small>
+                  ${escapeHTML(item.difficulty || "beginner")}
+                  · ${formatDate(item.date)}
+                </small>
+              </div>
+              <span class="${percentage < 70 ? "score-low" : "score-good"}">
+                ${Math.round(percentage)}%
+              </span>
+            </article>
+          `;
+        }).join("")
+      : `<p class="empty-state">Your completed AI practice sessions will appear here.</p>`;
   }
+}
 
-  history.slice(0, 10).forEach(item => {
-    const row = document.createElement("p");
-    const date = new Date(item.completedAt).toLocaleDateString();
+export function bindPracticeHistory() {
+  // History is displayed from saved results. No additional controls are required.
+}
 
-    row.textContent =
-      `${item.topic} — ${item.score}/${item.total} (${item.percentage}%) — ${date}`;
+function formatDate(value) {
+  if (!value) return "Date unavailable";
 
-    historyContainer.appendChild(row);
-  });
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Date unavailable";
+
+  return date.toLocaleDateString();
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[character]);
 }
