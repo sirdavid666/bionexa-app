@@ -1,0 +1,22 @@
+{
+  "name": "bionexa-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BioNexa - Biomedical Engineering Academic Companion",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "cap:sync": "cap sync",
+    "cap:android": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "6.2.1",
+    "@capacitor/core": "6.2.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "6.2.1",
+    "vite": "5.4.14"
+  }
+}
