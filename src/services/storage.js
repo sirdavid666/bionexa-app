@@ -1,47 +1,30 @@
-
 const PREFIX = "bionexa_";
 
 export const Storage = {
   get(key, fallback = null) {
     try {
-      const value = localStorage.getItem(PREFIX + key);
-      return value === null ? fallback : JSON.parse(value);
-    } catch (error) {
-      console.error("Storage read error:", error);
-      return fallback;
-    }
+      const value = globalThis.localStorage?.getItem(PREFIX + key);
+      return value === null || value === undefined ? fallback : JSON.parse(value);
+    } catch (error) { console.error("Storage read error:", error); return fallback; }
   },
-
   set(key, value) {
     try {
-      localStorage.setItem(PREFIX + key, JSON.stringify(value));
+      if (!globalThis.localStorage) return false;
+      globalThis.localStorage.setItem(PREFIX + key, JSON.stringify(value));
       return true;
-    } catch (error) {
-      console.error("Storage save error:", error);
-      return false;
-    }
+    } catch (error) { console.error("Storage save error:", error); return false; }
   },
-
   remove(key) {
-    localStorage.removeItem(PREFIX + key);
+    try { globalThis.localStorage?.removeItem(PREFIX + key); }
+    catch (error) { console.error("Storage remove error:", error); }
   },
-
   clear() {
-    Object.keys(localStorage)
-      .filter(key => key.startsWith(PREFIX))
-      .forEach(key => localStorage.removeItem(key));
+    try { Object.keys(globalThis.localStorage || {}).filter(key => key.startsWith(PREFIX)).forEach(key => globalThis.localStorage.removeItem(key)); }
+    catch (error) { console.error("Storage clear error:", error); }
   },
-
   getAll() {
     const result = {};
-
-    Object.keys(localStorage)
-      .filter(key => key.startsWith(PREFIX))
-      .forEach(key => {
-        const name = key.slice(PREFIX.length);
-        result[name] = this.get(name);
-      });
-
+    Object.keys(globalThis.localStorage || {}).filter(key => key.startsWith(PREFIX)).forEach(key => { const name = key.slice(PREFIX.length); result[name] = this.get(name); });
     return result;
   }
 };
