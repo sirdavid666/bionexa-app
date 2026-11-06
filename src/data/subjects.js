@@ -1,146 +1,194 @@
-
 export const subjects = [
   {
-    name: "Mathematics",
+    name: "Mathematics for Engineers",
     icon: "∑",
-    description: "Mathematical foundations for engineering.",
+    description: "Quantitative tools used throughout engineering and biomedical analysis.",
     topics: [
       "Algebra",
-      "Calculus",
-      "Differential equations",
-      "Linear algebra",
-      "Statistics",
       "Trigonometry",
-      "Complex numbers"
+      "Calculus",
+      "Differentiation",
+      "Integration",
+      "Vectors",
+      "Linear algebra and matrices",
+      "Complex numbers",
+      "Differential equations",
+      "Statistics and probability",
+      "Numerical methods"
     ]
   },
   {
     name: "Physics",
     icon: "ϕ",
-    description: "Understand physical principles.",
+    description: "Physical principles underlying measurement, devices and biological systems.",
     topics: [
-      "Mechanics",
-      "Electricity",
-      "Magnetism",
-      "Waves",
+      "Motion and forces",
+      "Work, energy and power",
+      "Waves and oscillations",
+      "Electricity and magnetism",
       "Thermodynamics",
-      "Optics"
+      "Fluid mechanics",
+      "Optics",
+      "Introductory modern physics"
     ]
   },
   {
-    name: "Anatomy",
-    icon: "◎",
-    description: "Study the structure of the human body.",
+    name: "Chemistry",
+    icon: "⚗",
+    description: "Chemical foundations for understanding materials and biological processes.",
     topics: [
+      "Atomic structure",
+      "Chemical bonding",
+      "Acids and bases",
+      "Solutions and concentration",
+      "Organic chemistry foundations",
+      "Chemical reactions",
+      "Biochemistry foundations"
+    ]
+  },
+  {
+    name: "Biology and Human Anatomy",
+    icon: "◎",
+    description: "Cells, tissues and the structure of the human body.",
+    topics: [
+      "Cell biology",
+      "Tissues",
       "Skeletal system",
       "Muscular system",
       "Nervous system",
-      "Cardiovascular system",
-      "Respiratory system",
-      "Digestive system"
+      "Cardiovascular anatomy",
+      "Respiratory anatomy",
+      "Digestive system",
+      "Blood and immunity"
     ]
   },
   {
     name: "Physiology",
     icon: "♡",
-    description: "Understand how the human body functions.",
+    description: "How body systems function and maintain homeostasis.",
     topics: [
       "Cell physiology",
-      "Blood physiology",
-      "Cardiac physiology",
+      "Cardiovascular physiology",
       "Respiratory physiology",
       "Renal physiology",
-      "Neurophysiology"
+      "Neurophysiology",
+      "Musculoskeletal physiology",
+      "Human physiology for biomedical engineers"
     ]
   },
   {
-    name: "Electronics",
-    icon: "ϟ",
-    description: "Electronic components and circuits.",
+    name: "Engineering Mechanics",
+    icon: "↗",
+    description: "Statics, dynamics and material response relevant to devices and movement.",
     topics: [
-      "Circuit fundamentals",
-      "Resistors",
-      "Capacitors",
-      "Diodes",
-      "Transistors",
-      "Amplifiers",
+      "Statics and equilibrium",
+      "Kinematics",
+      "Dynamics",
+      "Stress and strain",
+      "Mechanical properties",
+      "Fluid mechanics",
+      "Biomechanics"
+    ]
+  },
+  {
+    name: "Electrical and Electronic Engineering",
+    icon: "ϟ",
+    description: "Core electrical and electronic concepts used in biomedical devices.",
+    topics: [
+      "Electrical quantities",
+      "Circuit theory",
+      "Ohm's law",
+      "Kirchhoff's laws",
+      "Resistors and capacitors",
+      "Diodes and transistors",
+      "Operational amplifiers",
       "Digital electronics"
     ]
   },
   {
-    name: "Biomechanics",
-    icon: "↗",
-    description: "Mechanical principles in biological systems.",
+    name: "Programming and Computing",
+    icon: "</>",
+    description: "Computational thinking, coding and data handling for engineering.",
     topics: [
-      "Human movement",
-      "Forces and motion",
-      "Joint mechanics",
-      "Gait analysis",
-      "Mechanical properties of tissues"
+      "Programming fundamentals",
+      "Algorithms",
+      "Data structures",
+      "Data analysis",
+      "Numerical computing",
+      "Digital systems"
     ]
   },
   {
-    name: "Biomaterials",
+    name: "Materials Science and Biomaterials",
     icon: "◇",
-    description: "Materials used in medical applications.",
+    description: "Engineering materials and their interaction with biological environments.",
     topics: [
+      "Material structure and properties",
       "Metals",
       "Ceramics",
       "Polymers",
-      "Biocompatibility",
+      "Biocompatibility concepts",
       "Implant materials",
-      "Tissue engineering"
+      "Tissue engineering foundations"
     ]
   },
   {
     name: "Medical Instrumentation",
     icon: "⌁",
-    description: "Principles of medical measurement systems.",
+    description: "Measurement systems and devices used to acquire physiological information.",
     topics: [
-      "Sensors",
-      "Transducers",
-      "Amplifiers",
+      "Sensors and transducers",
+      "Measurement systems",
+      "Signal conditioning",
       "ECG instrumentation",
       "Patient monitoring",
-      "Measurement systems"
-    ]
-  },
-  {
-    name: "Medical Imaging",
-    icon: "▣",
-    description: "Imaging technologies in healthcare.",
-    topics: [
-      "X-ray imaging",
-      "Computed tomography",
-      "Magnetic resonance imaging",
-      "Ultrasound",
-      "Image processing"
+      "Medical device safety"
     ]
   },
   {
     name: "Biomedical Signals",
     icon: "∿",
-    description: "Signals from biological systems.",
+    description: "Acquisition and analysis of signals produced by biological systems.",
     topics: [
       "ECG signals",
       "EEG signals",
       "EMG signals",
-      "Signal filtering",
-      "Signal processing",
-      "Sampling"
+      "Sampling",
+      "Filtering",
+      "Signal processing foundations"
     ]
   },
   {
-    name: "Programming",
-    icon: "</>",
-    description: "Computational tools for engineering.",
+    name: "Medical Imaging",
+    icon: "▣",
+    description: "Principles of imaging technologies and biomedical image processing.",
     topics: [
-      "Programming fundamentals",
-      "JavaScript",
-      "Python",
-      "Algorithms",
-      "Data structures",
-      "Numerical methods"
+      "X-ray imaging",
+      "Computed tomography",
+      "Magnetic resonance imaging",
+      "Ultrasound",
+      "Image processing foundations"
+    ]
+  },
+  {
+    name: "Biomedical Engineering Design",
+    icon: "⌘",
+    description: "Human-centred engineering methods for developing and evaluating biomedical solutions.",
+    topics: [
+      "Problem definition",
+      "Requirements and constraints",
+      "Prototyping",
+      "Verification and validation",
+      "Risk and safety considerations",
+      "Design communication"
     ]
   }
 ];
+
+export function findSubjectTopic(topic) {
+  const query = String(topic || "").trim().toLowerCase();
+
+  return subjects
+    .flatMap(subject => subject.topics.map(item => ({ subject: subject.name, topic: item })))
+    .find(item => item.topic.toLowerCase() === query);
+}
